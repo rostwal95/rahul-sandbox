@@ -1,0 +1,49 @@
+# Gradle
+.gradle/
+build/
+
+# Eclipse
+.classpath
+.project
+.settings/*
+bin/
+
+# IntelliJ
+.idea
+*.ipr
+*.iml
+*.iws
+
+# NetBeans
+nb-configuration.xml
+
+# Visual Studio Code
+.vscode
+.factorypath
+
+# OSX
+.DS_Store
+
+# Vim
+*.swp
+*.swo
+
+# patch
+*.orig
+*.rej
+
+# Local environment
+.env
+
+oauth2-token-validate.log.
+
+#Compiled class file
+*.class
+
+# Quarkus
+.target/
+build/
+dev/
+.mvn/
+.quarkus/
+src/main/resources/META-INF/microprofile-config.properties
