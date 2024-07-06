@@ -23,7 +23,6 @@ Default output format [None]:
 
 aws s3 mb s3://quarkus.s3.quickstart --profile localstack --endpoint-url=http://localhost:4566
 
-## Setup
 
 ### 1. Clone the repository
 
@@ -31,4 +30,4 @@ aws s3 mb s3://quarkus.s3.quickstart --profile localstack --endpoint-url=http://
 git clone <repository-url>
 cd quarkus-amazon-s3
 
-gradle build
+gradle clean build
