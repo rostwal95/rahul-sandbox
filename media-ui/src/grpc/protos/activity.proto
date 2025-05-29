@@ -1,0 +1,169 @@
+syntax = "proto3";
+package com.cisco.wcc.ccai.v1;
+
+import "google/protobuf/struct.proto";
+import "virtualagent.proto";
+import "recognize.proto";
+import "tts.proto";
+import "utils.proto";
+
+service Activity {
+  /* Get the next Activity from the Activity Service. */
+  rpc GetActivity(GetActivityRequest) returns (stream GetActivityResponse);
+
+   /* The first request payload will contain the configuration, while subsequent requests will contain the recognition result. 
+   Each Streaming Response contains a VirtualAgentResult, with the valid sequence being PARTIAL, CHUNKED, FINAL. */
+  rpc GetActivityStreaming(stream GetActivityRequest) returns (stream GetActivityResponse);
+
+  /* Get all virtual agents */
+  rpc ListVirtualAgents(ListVirtualAgentsRequest) returns (ListVirtualAgentsResponse);
+}
+
+
+message GetActivityRequest {
+  /* Call Event from Client */
+  InputEvent input_event = 1;
+
+  /*  Unique conversationId. Callguid will be used as conversationId */
+  string conversation_id = 2;
+
+  /* OrgId for supporting OrgId based access */
+  string org_id = 3;
+
+  /* Unique Dialog ID for a conversation */
+  string message_id = 4;
+
+  /* Result of recognition based on previous request */
+  RecognitionResult recognition_result = 5;
+
+  /* Return the previous Activity context  */
+  google.protobuf.Struct activity_context = 6;
+
+  /* cms config for activity service */
+  CmsConfig cms_config = 7;
+
+  /* TODO: Recording URL */
+
+  //Optional field: populate if needed to call specific bot from the respective provider
+  string virtualAgentId = 8;
+
+  //language to be sent to NLU for multi language support
+  string language = 9;
+
+  // Provider specific Request object in JSON encoded string
+  string request_payload = 10;
+
+  bool streaming_response = 11; //Indicates whether the client needs a streaming response from server
+
+   //Unique identifier for a dialog session within Conversation/Call/Interaction, Value will be unique per Conversation Id
+   string legId = 12;
+
+   //Auto increament for each dialog within call_leg, will be unique per legId
+   int32 dialogId = 13;
+}
+
+message RecognitionResult {
+
+  /* User Input */
+  oneof UserInput {
+    /* Voice Input */
+    string voice = 1;
+
+    /* DTMF Input */
+    string dtmf = 2;
+  }
+
+  repeated SpeechRecognitionAlternative alternatives = 3;
+
+  // Dialog Events
+  enum DialogEvent {
+    SUCCESS = 0;        // Activity Successfully executed
+    NO_INPUT = 1;       // No Input from User
+    NO_MATCH = 2;       // User input does not matches
+    FAILURE = 3;        // There is an error in activity execution
+    START_OF_INPUT = 4; // Start of speech from VAD or STT, whichever returns first.
+    END_OF_INPUT = 5;   // End of speech from VAD or STT, whichever returns first.
+  }
+
+  DialogEvent dialog_event = 4;
+
+  /* Unique Activity Id for which result is submitted back */
+  // string activity_id = 7;
+
+  enum FailureReason {
+    FAILURE_INVALID_URL = 0;
+    FAILURE_INVALID_CONFIG = 1;
+    FAILURE_INVALID_CONNECTOR = 2;
+  }
+  FailureReason failure_reason = 5;
+
+   /*  If false, this represents an interim/partial transcript. If true, this is the final transcript marked by ASR engine. */
+  bool is_final = 6;
+
+  /* Future: Provider Used ?? */
+}
+
+message GetActivityResponse {
+
+  VirtualAgentResult virtualAgenResult = 1;
+
+  /* Required: Configuration for User Input */
+  InputConfig     input_config = 2;
+
+  /* Optional: Indicates the config id for services the service provider to be choosen based on this config.
+  Will default to Default CCAI Config if not provider */
+  string   ccai_config_id = 3;
+
+  /* Optional: Struct to capture any additional or miscellaneous info */
+  google.protobuf.Struct activity_context = 4;
+
+  /* Required: Configuration for speech synthesis */
+  OutputAudioConfig   output_audio_config = 5;
+
+  /* Optional: Placeholder to pass any hints/keywords for increased accurancy in recognition */
+  SpeechContext speech_context = 6;
+
+  /* Required: Unique Activity Id */
+  //  string activity_id = 9;
+}
+
+message OutputAudioConfig {
+  /* Audio Config for Synthesys */
+  AudioConfig audio_config = 1;
+
+  /* Synthesis Connector Id */
+  string connector_id = 2;
+}
+
+/* Configuration for the user input */
+message InputConfig {
+  /* Grammar */
+  RecognitionResource recognition_resource = 1;
+
+  /* Recognition Language */
+  string language_code = 2;
+
+  /* Recognition Model */
+  Model   model = 3;
+
+  //TODO: Refer Language from stt.proto RecognitionConfig, Language and model added in InputConfig Object, Kamal ??
+  //TODO: Confidence Threshold for Input, Decision on Confidence to be taken by flow / customer, the confidence threshold will be passed in input. Kamal ??
+  //TODO: Request to Record Utterance
+}
+
+message ListVirtualAgentsRequest {
+
+  //Org Identifier (control hub) for which the insights need to be delivered
+  string orgId = 1;
+
+  /* cms config for activity service */
+  CmsConfig cms_config = 2;
+
+}
+
+message ListVirtualAgentsResponse{
+
+  //Indicates the list of bots for the selected provider
+  repeated VirtualAgent virtualAgents = 1;
+
+}

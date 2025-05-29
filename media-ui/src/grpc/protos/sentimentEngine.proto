@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package sentiment;
+
+// The request message for streaming media or text analysis.
+message SentimentRequest {
+    // Unique identifier for the request.
+    string identifier = 1; 
+    
+    // Type of the payload being processed (start, ongoing, end).
+    DialogRequestPayloadType payload_type = 2;
+    
+    // Identifier for the participant submitting the request.
+    string participant_id = 3; 
+
+    // Oneof to specify the input type: either media (binary) or text (string).
+    oneof input_type {
+        bytes media = 4;  // Media data for sentiment analysis.
+        string text = 5;  // Text data for sentiment analysis.
+    }
+
+    // Type of sentiment analysis model to be used.
+    ModelType model_type = 6;
+    
+    // Voice Activity Detection time in milliseconds.
+    int32 vad_time = 7; 
+    
+    // Version of the model being used for analysis.
+    string model_version = 8;
+    
+    // Additional metadata for the request (key-value pairs).
+    map<string, string> metadata = 9;
+    
+    // Pointer scheme to indicate how to handle the input.
+    int32 pointer_scheme = 10;
+    
+    // Indicates if a transcription response is required.
+    bool transcription_response = 11;
+}
+
+// Error message structure for reporting issues during sentiment analysis.
+message Error {
+    // Unique error code.
+    string code = 1;
+    
+    // Description of the error.
+    string message = 2;
+}
+
+// Enum representing different model types for sentiment analysis.
+enum ModelType {
+    VOICE_TEXT = 0; // Model that analyzes both voice and text.
+    TEXT_ONLY = 1;  // Model that analyzes text only.
+}
+
+// Enum for the types of dialog request payloads.
+enum DialogRequestPayloadType {
+    PROCESS_START = 0; // Indicates the start of the processing.
+    PROCESSING = 1;    // Indicates that processing is ongoing.
+    PROCESS_END = 2;    // Indicates that processing has ended.
+}
+
+// Enum for the status of the processing response.
+enum ProcessResponse {
+    PROCESS_STARTED = 0; // Processing has started.
+    IN_PROGRESS = 1;     // Processing is currently in progress.
+    SEGMENT_SENTIMENT_AVAILABLE = 2; // Sentiment for a segment is available.
+    PROCESS_ENDED = 3;   // Processing has completed.
+}
+
+// The response message containing the sentiment analysis result for each utterance.
+message SentimentResponse {
+    // Unique identifier for the response.
+    string identifier = 1;
+    
+    // Identifier for the participant associated with the response.
+    string participant_id = 2;
+    
+    // Identifier for the segment of text or media analyzed.
+    string segment_id = 3;
+    
+    // Current status of the processing response.
+    ProcessResponse process_status = 4;
+    
+    // Start time of the segment in microseconds.
+    string start_time = 5;
+    
+    // End time of the segment in microseconds.
+    string end_time = 6;
+    
+    // sentiments identified in the analysis.
+    string sentiment = 7; 
+    
+    // Transcription of the analyzed media or text.
+    string transcription = 8;
+    
+    // Version of the model used for sentiment analysis.
+    string model_version = 9;
+    
+    // Confidence score of the sentiment analysis (0.0 to 1.0).
+    float confidence = 10;
+    
+    // Error information, if any occurred during processing.
+    Error error = 11;
+}
+
+// Message representing a ping request
+message PingRequest {
+  string message = 1; // The ping message content
+}
+
+// Message representing a pong response
+message PongResponse {
+  string message = 1; // The pong message content
+}
+
+
+// The SentimentService service definition for sentiment analysis.
+service SentimentService {
+    // RPC method for streaming sentiment analysis requests and responses.
+    rpc StreamSentimentAnalysis(stream SentimentRequest) returns (stream SentimentResponse);
+
+    // Ping RPC method which takes a PingRequest and returns a PongResponse
+    rpc Ping(PingRequest) returns (PongResponse);
+}
+
