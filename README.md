@@ -41,10 +41,11 @@ I'm an engineer who learns best by building things. This repository is:
 
 ## 📫 Let’s Connect
 
-Feel free to explore, fork, or reach out if anything resonates with you.
+If anything here resonates with you — whether it’s system design, AI integrations, or just the joy of building — feel free to connect or explore more of my work:
 
-- 🌐 https://linkedin.com/in/rahul-ostwal  
-- 🐙 https://github.com/rostwal95
+- 🔗 [LinkedIn](https://www.linkedin.com/in/rahul-ostwal-82180488/)
+- 🐙 [GitHub](https://github.com/rostwal95)
+
 
 ---
 
