@@ -1,0 +1,1 @@
+RSpec.configure{|c|}

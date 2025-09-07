@@ -1,0 +1,1 @@
+import { forward } from '@/lib/proxy'; export async function GET(req:Request){ const url = new URL(req.url); const seg = url.searchParams.get('segment_id'); return forward(`/v1/metrics/deliverability_series${seg?`?segment_id=${seg}`:''}`); }

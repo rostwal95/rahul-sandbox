@@ -1,0 +1,29 @@
+flowchart LR
+  subgraph Web[Next.js Web]
+    Editor[LP/Email Editors]
+    Analytics[Analytics & Ops]
+    Public["Public LP (/p/:slug)"]
+  end
+
+  subgraph API[Rails API]
+    C[Controllers]
+    M[Models]
+    W[Workers (Sidekiq)]
+  end
+
+  DB[(PostgreSQL)]
+  Cache[(Redis)]
+  Queue[[Sidekiq]]
+  SES[(SES/Sendgrid)]
+  Stripe[(Stripe)]
+  S3[(S3 Image Assets)]
+  ImgProxy[/Next /img (sharp)/]
+
+  Public -- "subscribe/confirm" --> C
+  Editor -- "JSON REST" --> C
+  Analytics -- "JSON REST" --> C
+  C --> M --> DB
+  C --> Queue --> W --> SES
+  C --> Stripe
+  Web --> ImgProxy --> S3
+  Public -- "RUM beacons" --> C

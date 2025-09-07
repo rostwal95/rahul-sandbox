@@ -1,0 +1,10 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: 5
+  url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/kit_builders_dev") %>
+development: { <<: *default }
+test:
+  <<: *default
+  url: <%= ENV.fetch("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/kit_builders_test") %>
+production: { <<: *default }

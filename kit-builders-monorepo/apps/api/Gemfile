@@ -1,0 +1,36 @@
+source 'https://rubygems.org'
+ruby '3.4.4'
+# Target upgrade: Rails 8.0.x
+gem 'rails', '~> 8.0.2'
+gem 'csv'
+gem 'pg', '~> 1.5'
+gem 'puma', '~> 6.4'
+gem 'rack-cors'
+gem 'redis', '~> 5.0'
+gem 'sidekiq', '~> 7.2'
+gem 'jwt'
+gem 'dotenv-rails', groups: [:development, :test]
+gem 'active_model_serializers'
+group :development, :test do
+  gem 'pry'
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'rubocop', require: false
+  gem 'rubocop-rails', require: false
+  gem 'listen', '~> 3.9'
+end
+
+# Auth
+gem 'devise'
+gem 'devise-jwt'
+
+# Billing
+gem 'stripe', '~> 15.5'
+
+# Webhooks verification
+gem 'ed25519'
+gem 'aws-sdk-sns'
+
+# AWS S3
+gem 'aws-sdk-s3'
+gem 'faraday'

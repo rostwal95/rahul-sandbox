@@ -1,0 +1,1 @@
+import { forward } from '@/lib/proxy'; export async function GET(req:Request){ const u=new URL(req.url); const slug=u.searchParams.get('slug'); const days=u.searchParams.get('days')||'14'; const qs = new URLSearchParams({ ...(slug?{slug}:{}) as any, days }); return forward(`/v1/rum/series?${qs.toString()}`); }

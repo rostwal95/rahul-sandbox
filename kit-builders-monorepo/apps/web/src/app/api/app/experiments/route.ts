@@ -1,0 +1,1 @@
+import { forward } from '@/lib/proxy'; export async function GET(){ return forward('/v1/experiments'); } export async function POST(req:Request){ const b=await req.text(); return forward('/v1/experiments',{ method:'POST', body:b }); }

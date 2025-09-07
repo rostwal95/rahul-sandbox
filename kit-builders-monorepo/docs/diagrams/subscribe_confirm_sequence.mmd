@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant U as User (LP)
+  participant Web as Next Public Page
+  participant API as Rails API
+  participant DB as Postgres
+  participant Q as Sidekiq
+
+  U->>Web: Submit email
+  Web->>API: POST /v1/public/subscribe
+  API->>DB: create contact + token
+  API->>DB: log Event(kind: 'signup', stage: 'initiated')
+  API->>Q: enqueue confirmation email
+  U->>API: GET /v1/public/confirm?t=...
+  API->>DB: mark confirmed_at; log Event(kind: 'confirm')
+  API->>Q: WelcomeEmailWorker(contact_id)
+  API-->>U: 302 → /p/:slug/thanks

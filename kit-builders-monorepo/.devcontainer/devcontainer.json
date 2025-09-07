@@ -1,0 +1,26 @@
+{
+  "name": "Kit Builders",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "web",
+  "workspaceFolder": "/workspaces/kit-builders",
+  "remoteUser": "node",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": { "version": "20" },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "streetsidesoftware.code-spell-checker",
+        "Shopify.ruby-extensions-pack"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 4000, 5432, 6379],
+  "postCreateCommand": "pnpm install && pnpm --filter @kit/web install && sudo apt-get update -y || true"
+}

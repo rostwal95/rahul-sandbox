@@ -1,0 +1,2 @@
+web: bin/dev
+worker: bundle exec sidekiq -q default

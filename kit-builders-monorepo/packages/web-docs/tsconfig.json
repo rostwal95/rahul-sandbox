@@ -1,0 +1,16 @@
+{
+  "extends": "../../apps/web/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": [
+    "./**/*.ts",
+    "./**/*.tsx",
+    "./stories/**/*.ts",
+    "./stories/**/*.tsx"
+  ],
+  "exclude": ["node_modules"]
+}

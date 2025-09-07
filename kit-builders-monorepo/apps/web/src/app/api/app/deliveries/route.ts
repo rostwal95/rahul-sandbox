@@ -1,0 +1,1 @@
+import { forward } from '@/lib/proxy'; export async function GET(req:Request){ const url=new URL(req.url); const cid=url.searchParams.get('contact_id'); return forward(`/v1/deliveries${cid?`?contact_id=${cid}`:''}`);}

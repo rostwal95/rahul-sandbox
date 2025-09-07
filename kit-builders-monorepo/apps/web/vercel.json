@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm install && pnpm build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "ignoreCommand": "echo 'use Vercel PR preview defaults'"
+}

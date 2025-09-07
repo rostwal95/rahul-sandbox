@@ -1,0 +1,72 @@
+/* Design Tokens */
+@layer base {
+  :root {
+    /* Color roles */
+    --bg: #fafafa; /* Kit background */
+    --card: #ffffff; /* Card surface */
+    --ink: #0a0a0a; /* Primary text */
+    --muted: #6b6f76; /* Muted text tuned slightly cooler */
+    --border: #e7e7ea; /* Subtle neutral border */
+    --brand: #0d9488; /* teal 600 */
+    --info: #0369a1;
+    --warn: #b45309;
+    --danger: #b91c1c;
+    --success: #047857;
+
+    /* Radii */
+    --radius-lg: 22px; /* Card corners */
+    --radius-md: 12px; /* Medium surfaces */
+    --radius-sm: 8px; /* Small elements */
+    --radius-pill: 11px; /* Pills / chips */
+
+    /* Shadows */
+    --shadow-rest: none;
+    --shadow-hover:
+      0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+
+    /* Typography scale */
+    --fs-2xl: clamp(1.75rem, 1.6rem + 0.6vw, 2rem); /* 28-32 */
+    --fs-xl: clamp(1.25rem, 1.2rem + 0.4vw, 1.375rem); /* 20-22 */
+    --fs-md: clamp(0.875rem, 0.85rem + 0.2vw, 1rem); /* 14-16 */
+    --fs-sm: clamp(0.75rem, 0.72rem + 0.2vw, 0.8125rem); /* 12-13 */
+    --lh-body: 1.4;
+    --lh-head: 1.2;
+
+    /* Spacing rhythm (8pt grid) */
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+
+    /* Motion */
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --dur-1: 120ms;
+    --dur-2: 180ms;
+    --dur-3: 260ms;
+
+    /* Focus */
+    --focus-ring:
+      0 0 0 2px rgba(255, 255, 255, 0.9), 0 0 0 4px rgba(17, 24, 39, 0.25);
+  }
+  :root.dark {
+    --bg: #0b0f17;
+    --card: #111827;
+    --ink: #f1f5f9;
+    --muted: #64748b;
+    --border: #1f2937;
+    --brand: #14b8a6;
+    --info: #0ea5e9;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --success: #10b981;
+    --shadow-hover: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      color-scheme: dark;
+    }
+  }
+}

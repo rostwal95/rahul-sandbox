@@ -1,0 +1,26 @@
+{
+  "name": "@kit/email-templates",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "echo 'email template dev disabled offline'",
+    "build": "tsc -b",
+    "render:welcome": "node scripts/render-welcome.mjs || true",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react-email": "^4.2.0",
+    "@react-email/components": "^0.5.2",
+    "@react-email/render": "^1.2.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "@types/react": "^19.0.4",
+    "@types/react-dom": "^19.0.2"
+  }
+}

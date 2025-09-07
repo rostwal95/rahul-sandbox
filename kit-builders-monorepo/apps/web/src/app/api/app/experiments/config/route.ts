@@ -1,0 +1,1 @@
+import { forward } from '@/lib/proxy'; export async function GET(req:Request){ const u=new URL(req.url); const slug=u.searchParams.get('slug')||''; return forward(`/v1/experiments/config?slug=${slug}`); }

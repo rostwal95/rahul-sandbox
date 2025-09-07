@@ -1,0 +1,37 @@
+{
+  "name": "kit-builders",
+  "private": true,
+  "packageManager": "pnpm@9.7.1",
+  "engines": {
+    "node": "22.x"
+  },
+  "workspaces": [
+    "apps/web",
+    "packages/*",
+    "packages/email-templates",
+    "packages/templates",
+    "packages/web-docs"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "dev:api": "cd apps/api && bin/rails s -p 4000",
+    "dev:sidekiq": "cd apps/api && bundle exec sidekiq -q default -q mailers",
+    "dev:web": "pnpm --filter @kit/web dev",
+    "dev:all": "concurrently -n API,WEB 'pnpm dev:api' 'pnpm dev:web'",
+    "dev:full": "concurrently -n API,SIDEKIQ,WEB 'pnpm dev:api' 'pnpm dev:sidekiq' 'pnpm dev:web'",
+    "smoke:api": "bash scripts/smoke_endpoints.sh"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1",
+    "turbo": "^2.1.1"
+  },
+  "dependencies": {
+    "@tiptap/extension-code-block-lowlight": "^3.0.0",
+    "highlight.js": "^11.9.0",
+    "lowlight": "^3.1.0"
+  }
+}

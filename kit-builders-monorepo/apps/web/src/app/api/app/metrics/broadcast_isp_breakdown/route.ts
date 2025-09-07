@@ -1,0 +1,1 @@
+import { forward } from '@/lib/proxy'; export async function GET(req:Request){ const u=new URL(req.url); const id=u.searchParams.get('broadcast_id'); return forward(`/v1/metrics/broadcast_isp_breakdown?broadcast_id=${id}`); }

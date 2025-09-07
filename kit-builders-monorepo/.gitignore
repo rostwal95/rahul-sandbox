@@ -1,0 +1,104 @@
+dist
+
+### macOS / OS artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+Thumbs.db
+
+### Node / JS / TS
+node_modules/
+dist/
+build/
+*.log
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log
+.eslintcache
+.stylelintcache
+.tsbuildinfo
+
+### Next.js / Frontend
+.next/
+.next/cache/
+out/
+.vercel/
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+playwright/.cache/
+
+### Turbo / pnpm / Yarn Plug n Play
+.turbo/
+.pnpm-store/
+.pnp.*
+
+### Env & secrets (allow explicit examples via *.example)
+.env
+.env.*
+!.env.example
+!.env.*.example
+.env.local
+.env.*.local
+.envrc
+.vault-token
+
+### IDE / Editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+### Ruby / Rails
+.bundle/
+vendor/bundle/
+log/
+tmp/
+storage/
+public/assets
+public/packs
+public/packs-test
+.byebug_history
+.ruby-version
+.sprockets-manifest*
+coverage/
+
+# Rails credentials 
+# config/master.key
+# config/credentials.yml.enc
+
+### Misc caches
+.cache/
+.parcel-cache/
+.vite/
+.sass-cache/
+
+### Images / generated
+*.iml
+
+### Lock & state
+package-lock.json
+*.orig
+
+### Temporary exports / scratch
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+
+### Generated type coverage artifacts
+type-coverage/coverage.json
+
+### Prevent committing large data
+*.psd
+*.sketch
+*.ai
+*.zip
+

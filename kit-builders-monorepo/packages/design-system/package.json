@@ -1,0 +1,49 @@
+{
+  "name": "@kit/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "tsc -b && storybook build",
+    "lint": "echo 'noop'",
+    "test": "echo 'noop'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "lucide-react": "^0.542.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.5",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-tooltip": "^1.0.7",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@headlessui/react": "^2.1.8",
+    "class-variance-authority": "^0.7.0",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
+    "clsx": "^2.1.1",
+    "@radix-ui/react-scroll-area": "^1.0.5",
+    "@radix-ui/react-toggle-group": "^1.0.5",
+    "react-hook-form": "^7.53.0",
+    "zod": "^3.23.8",
+    "@hookform/resolvers": "^3.9.0",
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^10.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "@types/react": "^19.0.4",
+    "@types/react-dom": "^19.0.2",
+    "@storybook/react": "^8.2.9",
+    "@storybook/addon-essentials": "^8.2.9",
+    "@storybook/addon-a11y": "^8.2.9",
+    "storybook": "^8.2.9",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.0.0",
+    "postcss": "^8.4.47"
+  }
+}

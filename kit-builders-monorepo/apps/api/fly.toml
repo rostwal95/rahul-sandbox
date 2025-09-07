@@ -1,0 +1,20 @@
+app = "kit-builders-api"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "4000"
+  RAILS_LOG_TO_STDOUT = "enabled"
+
+[[services]]
+  internal_port = 4000
+  processes = ["app"]
+  protocol = "tcp"
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443

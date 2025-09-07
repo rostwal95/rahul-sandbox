@@ -1,0 +1,1 @@
+class Org < ApplicationRecord; end
