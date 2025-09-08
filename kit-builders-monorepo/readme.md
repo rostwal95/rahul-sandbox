@@ -4,13 +4,12 @@ Minimal, demo-focused prototype for a creator publishing experience. Not product
 
 ## Demo (Video)
 
-<video src="./docs/recording/demo.mp4" width="720" autoplay loop muted playsinline controls poster="./docs/recording/demo-poster.png">
-	<source src="./docs/recording/demo.mp4" type="video/mp4" />
-	Your browser does not support the video tag. <a href="./docs/recording/demo.mp4">Download the demo video</a>.
-</video>
+Clickable thumbnail below links to the hosted demo video asset.
 
-Direct link (fallback): [Open demo video](./docs/recording/demo.mp4).
+[![Demo Video](docs/screenshots/dashboard.png)](https://github.com/user-attachments/assets/abcf960f-d75d-41fd-808d-3ed449528c09)
 
+Direct link (GitHub will open an inline player):
+https://github.com/user-attachments/assets/abcf960f-d75d-41fd-808d-3ed449528c09
 
 ## Quick Start
 
