@@ -9,7 +9,7 @@ A **minimal, incomplete prototype**, sketching a single happy-path funnel **(onb
 
 **Illustrative stack:** **Next.js (App Router) + React (TypeScript, Tailwind)** for UI, **Ruby on Rails 7.2** API, **PostgreSQL**, **Redis + Sidekiq**. Small client state via **Zustand**; UI primitives from **shadcn/ui, Radix UI, lucide-react, React Email**.
 
-> **Naming usage**: “Kit” here is purely descriptive for internal exploration; this repo has **no code from** actual Kit production system.
+
 
 ---
 

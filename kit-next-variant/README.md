@@ -13,8 +13,14 @@ local-only exploration of a creator + optimizer loop: draft → publish → obse
 
 ## Demo
 
-[![Watch the demo](./docs/demo-poster.png)
-Short walkthrough: template → edit → publish/variant → email draft (variant + rewrite) → simulation/events.
+<video src="./docs/demo.mp4" width="720" autoplay loop muted playsinline controls poster="./docs/demo-poster.png">
+	<source src="./docs/demo.mp4" type="video/mp4" />
+	Your browser does not support the video tag. <a href="./docs/demo.mp4">Download the demo video</a>.
+</video>
+
+Flow: template → edit → publish/variant → email variant + rewrite → simulation/events.
+
+If the video does not load, here please find the video at `docs/demo.mp4` location.
 
 ## Tech Stack
 
