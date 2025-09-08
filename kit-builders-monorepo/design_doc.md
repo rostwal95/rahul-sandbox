@@ -1,170 +1,353 @@
+
+
 # Kit Builders — Prototype / POC Monorepo
 
-A **minimal, intentionally incomplete prototype** loosely Kit‑inspired, sketching a single happy‑path funnel **(onboarding → activation → conversion)** across **emails, landing pages, sequences, and lightweight analytics**.  
-Primary purpose: illustrate a possible architectural shape (UI ↔ API data flow, editor composition, background job handoff). It is **explicitly NOT** production ready, product complete, security hardened, nor an official Kit codebase.  
-Stack (illustrative only): **Next.js (App Router) + React (TypeScript, Tailwind)** UI, **Ruby on Rails 7.2** API, **PostgreSQL**, **Redis + Sidekiq**. Light client state via **Zustand**; UI primitives from **shadcn/ui, Radix UI, lucide-react, React Email**.
+A **minimal, incomplete prototype**, sketching a single happy-path funnel **(onboarding → activation → conversion)** across **emails, landing pages, sequences, and lightweight analytics**.
 
-> Naming usage: “Kit” here is purely descriptive for internal exploration; this repo has **no affiliation with, endorsement from, or code sourced from any actual Kit production system**.
+> **Purpose:** illustrate an architectural shape (UI ↔ API data flow, editor composition, background job handoff).
+> **Not production:** this is **not** production ready, security hardened, or feature complete. It’s an educational scaffold.
 
-> Disclaimer / Caveats (read first)
->
-> - Code is **lightly exercised / not systematically tested**; latent bugs & race conditions expected.
-> - Security, authZ roles, multi‑tenant isolation, billing accuracy, data retention, PII handling, and deliverability are **NOT hardened**.
-> - “Implemented” usually means a **UI stub or partial flow**, not full lifecycle logic.
-> - Analytics, experiments, feature flagging, segmentation, and sequence execution are **simplified mock slices**.
-> - Treat this strictly as a **throwaway learning scaffold / architectural sketch**, never as a seed for real production.
-> - Any capacity / KPI numbers shown are **illustrative thought exercises**, not validated benchmarks.
+**Illustrative stack:** **Next.js (App Router) + React (TypeScript, Tailwind)** for UI, **Ruby on Rails 7.2** API, **PostgreSQL**, **Redis + Sidekiq**. Small client state via **Zustand**; UI primitives from **shadcn/ui, Radix UI, lucide-react, React Email**.
+
+> **Naming usage**: “Kit” here is purely descriptive for internal exploration; this repo has **no code from** actual Kit production system.
+
+---
+
+## Table of Contents
+
+* [Disclaimer / Caveats](#disclaimer--caveats)
+* [Overview](#overview)
+* [Repo Layout](#repo-layout)
+* [Illustrative Demo Goals](#illustrative-demo-goals)
+* [Current features](#current-features)
+* [Functional Requirements](#functional-requirements)
+* [Non-Functional Requirements](#non-functional-requirements)
+* [Back-of-the-envelope Calculations](#back-of-the-envelope-calculations)
+* [Design Patterns & Architecture](#design-patterns--architecture)
+* [Architecture Diagrams](#architecture-diagrams)
+
+  * [Flowchart (Mermaid source)](#flowchart-mermaid-source)
+  * [Subscribe → Confirm → Welcome (Mermaid source)](#subscribe--confirm--welcome-mermaid-source)
+* [API Surface](#api-surface)
+* [Data Model](#data-model)
+* [Health & Diagnostics](#health--diagnostics)
+* [AI Integration Hooks](#ai-integration-hooks)
+* [Getting Started](#getting-started)
+
+  * [Prereqs](#prereqs)
+  * [Environment Variables](#environment-variables)
+  * [Local Dev (no Docker)](#local-dev-no-docker)
+  * [Docker Dev](#docker-dev)
+  * [E2E (Playwright)](#e2e-playwright)
+  * [Makefile Shortcuts](#makefile-shortcuts)
+* [Known Gaps](#known-gaps)
+* [Future Considerations](#future-considerations)
+* [Glossary](#glossary)
+
+---
+
+## Disclaimer / Caveats
+
+* Code is **lightly exercised / untested**; expect bugs & race conditions.
+* Security, authZ roles, multi-tenancy, billing accuracy, data retention, PII handling, and deliverability are **not** hardened.
+* “Implemented” often means **UI stub** or **partial flow**, not a complete lifecycle.
+* Analytics/experiments/segmentation/sequence execution are **simplified**.
+* Capacity/KPI numbers are **illustrative only**.
 
 ---
 
 ## Overview
 
-This prototype sketches an end‑to‑end creator experience (happy‑path only):
+**Happy-path creator experience:**
 
-- Fast **onboarding** (guided drawer and templates)
-- **Activation** via ready‑to‑ship flows (broadcasts, sequences, LP builder)
-- **Conversion**: landing pages with smart‑crop hero images, A/B tests, subscribe forms, double opt‑in, analytics, RUM, and experiment guardrails.
+* **Onboarding**: guided drawer & templates.
+* **Activation**: ready-to-ship flows (broadcasts, sequences, LP builder).
+* **Conversion**: LPs with smart-crop hero images, A/B tests, subscribe forms, double opt-in, RUM, simple analytics.
 
-It includes **rudimentary placeholders** for: deliverability‑adjacent analytics, feature flags & plan gates (basic), webhook ingestion (simplified), CSV export/import stubs, Stripe billing stubs, and AI authoring hook points. Most are **scaffolds, not finished subsystems**.
+Includes placeholders for: deliverability-adjacent analytics, feature flags/plan gates, webhook ingestion, CSV export/import stubs, Stripe billing stubs, and AI authoring hook points.
 
-Directory highlights (synced with repo):
+---
+
+## Repo Layout
 
 ```
 apps/
-  web/          -> Next.js 15 app (App Router) – dashboard, editors, analytics UI, public LP renderer
-  api/          -> Rails 7.2 API – models, controllers, workers, webhooks, experiments, exports
+  web/               # Next.js 15 (App Router): dashboard, editors, analytics UI, public LP renderer
+  api/               # Rails 7.2 API: models, controllers, workers, webhooks, exports, experiments
 packages/
-  design-system/ -> Reusable React UI primitives (Button, Input, BlocksPalette, etc.)
-  email-templates/ -> React Email source + rendering scripts
-  templates/       -> Landing & email template metadata/helpers
-  web-docs/        -> Storybook / docs stories (early component documentation)
+  design-system/     # Reusable UI primitives (Button, Input, BlocksPalette, etc.)
+  email-templates/   # React Email sources + rendering scripts
+  templates/         # Landing & email template metadata/helpers
+  web-docs/          # Storybook/docs stories (early component documentation)
+docs/
+  diagrams/          # .mmd (Mermaid) sources + exported PNGs
+  screenshots/       # Static UI screenshots
 ```
 
-Recent demo tweaks (non‑exhaustive, unstable):
-
-- Combined dashboard summary endpoint (shape may change)
-- Sticky top bar + visual background experiments
-- Rich sequence/email editor (TipTap v3) – limited extension set
-- Button contrast & dark mode pass (accessibility **not audited**)
-
-### Dashboard snapshot (illustrative)
+**Dashboard snapshot**
 
 ![Dashboard](docs/screenshots/dashboard.png)
 
-<sub>Static screenshot of the current demo dashboard UI (placeholder metrics & flags). File: `docs/screenshots/dashboard.png` — replace freely; no expectation of visual stability.</sub>
+---
+
+## Illustrative Demo Goals
+
+| Category        | Intent (not guaranteed)        | Status    |
+| --------------- | ------------------------------ | --------- |
+| Onboarding      | Draft to first publish <10m    | Partial   |
+| Experimentation | Variant allocation + SRM check | Basic     |
+| Analytics       | Lightweight engagement view    | Partial   |
+| Contracts       | Typed web ↔ API DTOs           | Partial   |
+| Background      | Enqueue + worker chain         | Minimal   |
+| RUM             | LCP/TTFB on demo pages         | Prototype |
+| Security        | Signature verification sketch  | Missing   |
 
 ---
 
-## Illustrative (non‑binding) demo goals
+## Current features
 
-| Category        | Illustrative intention (not achieved / not guaranteed) | Status (approx) |
-| --------------- | ------------------------------------------------------ | --------------- |
-| Onboarding      | Fast draft to first publish (<10m)                     | Partial UI      |
-| Experimentation | Show placeholder variant allocation + SRM              | Basic stub      |
-| Analytics       | Lightweight engagement snapshot                        | Partial         |
-| Contracts       | Typed web ↔ API DTOs                                  | Partial         |
-| Background      | Demonstrate enqueue + worker processing chain          | Minimal         |
-| RUM             | Capture LCP/TTFB for demo pages                        | Prototype       |
-| Security        | Sketch signature verification placeholder              | Not implemented |
+> **Status:** partial / unstable — intended for a quick architectural walkthrough
 
----
+* **Onboarding drawer** with dashboard CTAs & combined metrics endpoint (shape may change).
+* **Email / Sequence designer (TipTap v3):**
 
-## Demo scope reference (functional slices)
+  * Formatting (bold/italic/underline/strike), headings (H1–H3), lists, blockquote, code block, HR, links.
+  * Slash command palette (`/`) to insert headings/lists/code/HR/image placeholder.
+  * **Plain vs Rich** toggle; word/char counts; **SMS 160-char segment estimation** for `sms` blocks.
+  * Drag-reorder blocks (email, wait, sms, branch); inline editors; remove actions.
+  * Persistent **client-side draft store** (Zustand).
+* **LP builder** with blocks (Hero / CTA / Subscribe / ThankYou / Features), **smart-crop** & focal; SSR `<picture>`.
+* **Subscribe → double opt-in → welcome** worker chain (rate-limited).
+* **Experiments**: variant selection, ramp control (simplified), **SRM** detection & χ² significance check, rudimentary trends.
+* **RUM**: p50/p95 LCP/TTFB, device breakdown, CTA/signup events.
+* **Analytics**: link cohorts, domain engagement, basic CSV exports.
+* **Webhooks**: basic ingest + retry semantics (DLQ/replay concepts; not hardened).
+* **Admin**: feature flags, per-org overrides, plan gates.
+* **Image proxy**: Next route + sharp; signed URL helper.
 
-| Slice          | What the prototype shows (simplified) | Real gaps / omissions          |
-| -------------- | ------------------------------------- | ------------------------------ |
-| Onboarding     | Drawer UI steps (static)              | No persisted progress          |
-| Broadcasts     | Rich text draft editor                | No robust send pipeline        |
-| Sequences      | Client‑side draft blocks              | No scheduling / execution      |
-| Landing Pages  | Block builder & preview               | Limited publishing rules       |
-| Smart Crop     | Basic focal point transform           | No CDN strategy                |
-| Subscribe Flow | Double opt‑in happy path              | Limited error handling         |
-| Experiments    | Simple allocation + SRM flag          | No lifecycle mgmt              |
-| Analytics      | Minimal engagement snapshot           | No warehouse / retention       |
-| Audience       | Segments placeholder + CSV stub       | No scalable import             |
-| Webhooks       | Basic ingest endpoint                 | No signature verify / DLQ auth |
-| Billing        | Stub checkout path                    | No real invoices / proration   |
-| Exports        | CSV/JSON concept                      | Streaming not hardened         |
+**Sequence editor types**
 
-### Non‑functional (illustrative aspirations, not met)
-
-| Quality       | Target / Mechanism                                 |
-| ------------- | -------------------------------------------------- |
-| Performance   | SSR LPs; SWR cache; sharp image transforms (basic) |
-| Reliability   | Some retry semantics via Sidekiq (basic)           |
-| Security      | Placeholder for signatures/auth scoping            |
-| Scalability   | Monolith only; no real load testing                |
-| Observability | Barebones RUM + queue count (manual)               |
-| Compliance    | Minimal; no formal processes                       |
+```ts
+interface SequenceDraft { id: string; name: string; updatedAt: number; blocks: SequenceBlock[] }
+type SequenceBlock = EmailBlock | SmsBlock | WaitBlock | BranchBlock;
+```
 
 ---
 
-## Back‑of‑the‑envelope (illustrative only)
+## Functional Requirements
 
-| Metric                | Assumption                             | Result                          |
-| --------------------- | -------------------------------------- | ------------------------------- |
-| Creators              | 5k creators                            | 5k                              |
-| Subscribers / creator | 20k avg                                | 100M total                      |
-| Broadcast cadence     | Weekly (4/mo)                          | 400M emails/mo                  |
-| Webhook multiplier    | 1.2× (opens/clicks/bounces)            | 480M events/mo                  |
-| Event storage (avg)   | 1KB                                    | 480GB/mo raw (warehouse needed) |
-| RUM sampling          | 1M views/day raw                       | Sample 1–10%                    |
-| Worker throughput     | 100 jobs/s per pod × 20 (hypothetical) | 2k jobs/s (NOT validated)       |
-| Postgres strategy     | Hot vs cold data                       | Offload cold to warehouse       |
-
----
-
-## Design patterns & architecture (exploratory choices)
-
-| Topic               | Choice / Pattern                             | Rationale                                |
-| ------------------- | -------------------------------------------- | ---------------------------------------- |
-| Server architecture | Rails MVC                                    | Mature ecosystem, rapid CRUD & jobs      |
-| Web architecture    | Next.js App Router (MPA + islands)           | Hybrid SSR/CSR for SEO + speed           |
-| Frontend modularity | Single repository (monolith)                 | Simplifies DX; micro‑frontends deferred  |
-| State management    | Local/component state + small Zustand stores | Minimal global footprint, explicit flows |
-| UI primitives       | Radix + shadcn + Tailwind                    | Accessible, composable, rapid styling    |
-| Data flow           | Unidirectional fetchers + SWR caching        | Predictable, avoids hidden side effects  |
-| Background jobs     | Sidekiq + Redis queues                       | Demonstrate enqueue + retry semantics    |
-| Experimentation     | A/B with SRM + χ² significance checks        | Catch allocation skew early              |
-| Media handling      | Sharp transforms via Next image route        | On‑demand resizing & optimization        |
-| Observability       | Custom RUM + queue metrics                   | Lightweight, focused signals             |
+| Slice          | Shows (simplified)          | Real Gaps                    |
+| -------------- | --------------------------- | ---------------------------- |
+| Onboarding     | Drawer UI steps             | No persisted progress        |
+| Broadcasts     | Rich text draft editor      | No robust send pipeline      |
+| Sequences      | Client-side draft blocks    | No scheduling/execution      |
+| Landing Pages  | Block builder & preview     | Limited publishing rules     |
+| Smart Crop     | Focal point transform       | No CDN strategy              |
+| Subscribe Flow | Double opt-in happy path    | Limited error handling       |
+| Experiments    | Allocation + SRM + χ²       | No lifecycle mgmt            |
+| Analytics      | Minimal engagement snapshot | No warehouse/retention       |
+| Audience       | Segments + CSV stub         | No scalable import           |
+| Webhooks       | Basic ingest + retry        | No signature verify/DLQ auth |
+| Billing        | Stub checkout path          | No real invoices/proration   |
+| Exports        | CSV/JSON concept            | Streaming not hardened       |
 
 ---
 
-## Architecture (conceptual)
+## Non-Functional Requirements
 
-![Architecture](docs/diagrams/architecture.png)
-
-<sub>PNG manually exported from `docs/diagrams/architecture.mmd`.</sub>
-
-### Sequence: Subscribe → Confirm → Welcome
-
-![Subscribe → Confirm Sequence](docs/diagrams/subscribe_confirm_sequence.png)
-
-<sub>PNG manually exported from `docs/diagrams/subscribe_confirm_sequence.mmd`.</sub>
+| Quality       | Target / Mechanism                           |
+| ------------- | -------------------------------------------- |
+| Performance   | SSR LPs; SWR cache; sharp transforms (basic) |
+| Reliability   | Sidekiq retries (basic)                      |
+| Security      | Placeholder signatures/auth scoping          |
+| Scalability   | Monolith only; no real load testing          |
+| Observability | Barebones RUM + queue count (manual)         |
+| Compliance    | Minimal; no formal processes                 |
 
 ---
 
-## API design (prototype surface)
+## Back-of-the-envelope Calculations
 
-| Domain      | Endpoint (prefix /v1)              | Purpose               | Notes                      |
-| ----------- | ---------------------------------- | --------------------- | -------------------------- |
-| Auth        | /auth/sign_in                      | Session stub          | Enhance JWT later          |
-| Pages       | /pages, /blocks                    | Landing pages CRUD    | Slug fetch via /pages/slug |
-| Broadcasts  | /broadcasts                        | Create & send emails  | Worker send pipeline       |
-| Sequences   | /sequences                         | Drip campaigns        | Scheduling TBD             |
-| Experiments | /experiments, /experiments/results | A/B config + results  | SRM & significance         |
-| Metrics     | /metrics/\*                        | Analytics series      | Cohorts, engagement        |
-| RUM         | /rum/\*                            | Perf & events summary | Sampling client side       |
-| Audience    | /segments, /imports, /exports      | Segments + CSV jobs   | Jobs + polling             |
-| Webhooks    | /webhooks/ingest                   | ESP events intake     | DLQ & replay endpoints     |
-| Billing     | /stripe/checkout, /stripe/webhook  | Plan upgrade          | Stubbed                    |
-| Public      | /public/subscribe, /public/confirm | Opt‑in flow           | Tokens + redirect          |
-| Admin       | /feature_flags, /feature_overrides | Flags & overrides     | Plan + % rollout           |
+| Metric              | Assumption                          | Result                        |
+| ------------------- | ----------------------------------- | ----------------------------- |
+| Creators            | 5k                                  | 5k                            |
+| Subscribers/creator | 20k avg                             | 100M total                    |
+| Broadcast cadence   | Weekly (4/mo)                       | 400M emails/mo                |
+| Webhook multiplier  | 1.2× (opens/clicks/bounces)         | 480M events/mo                |
+| Event storage (avg) | 1KB                                 | 480GB/mo raw                  |
+| RUM sampling        | 1M views/day raw → 1–10% sample     | 0.1–1M/day stored             |
+| Worker throughput   | 100 jobs/s per pod × 20 pods (hypo) | 2k jobs/s (**not validated**) |
+| Postgres strategy   | Hot vs cold                         | Cold offloaded to warehouse   |
 
-_Versioned base: `/v1/...` (surfaced to the web app via a Next.js internal proxy)._
+---
 
-Response example (cohorts):
+## Design Patterns & Architecture
+
+| Topic               | Choice / Pattern                       | Rationale                                |
+| ------------------- | -------------------------------------- | ---------------------------------------- |
+| Server architecture | Rails MVC                              | Mature ecosystem, fast CRUD & jobs       |
+| Web architecture    | Next.js App Router (MPA + islands)     | Hybrid SSR/CSR for SEO + speed           |
+| Frontend modularity | Single repo (monolith)                 | Simplifies DX; micro-frontends deferred  |
+| State management    | Component state + small Zustand stores | Minimal global footprint, explicit flows |
+| UI primitives       | Radix + shadcn + Tailwind              | Accessible, composable, rapid styling    |
+| Data flow           | Fetchers + SWR caching                 | Predictable, low hidden side effects     |
+| Background jobs     | Sidekiq + Redis queues                 | Demonstrate enqueue + retry semantics    |
+| Experimentation     | A/B with SRM + χ² significance         | Catch skew early                         |
+| Media handling      | Sharp via Next image route             | On-demand resizing & optimization        |
+| Observability       | Custom RUM + queue metrics             | Lightweight, focused signals             |
+
+---
+
+## Architecture Diagrams
+
+> PNGs are checked in. Mermaid sources below are **validated** for stricter renderers.
+
+### Flowchart (Mermaid source)
+
+```mermaid
+flowchart LR
+  %% Subgraphs
+  subgraph Web["Next.js Web"]
+    Editor["LP / Email Editors"]
+    Analytics["Analytics & Ops"]
+    Public["Public LP (/p/:slug)"]
+  end
+
+  subgraph API["Rails API"]
+    C["Controllers"]
+    M["Models"]
+    W["Workers — Sidekiq"]
+  end
+
+  %% Nodes (rectangles for max compatibility)
+  DB["PostgreSQL"]
+  Cache["Redis"]
+  Queue["Sidekiq Queue"]
+  SES["SES / Sendgrid"]
+  Stripe["Stripe"]
+  S3["S3 Image Assets"]
+  ImgProxy["Next /img (sharp)"]
+
+  %% Edges (unchained)
+  Public -- "subscribe/confirm" --> C
+  Editor -- "JSON REST" --> C
+  Analytics -- "JSON REST" --> C
+  C --> M
+  M --> DB
+  C --> Queue
+  Queue --> W
+  W --> SES
+  C --> Stripe
+  Web --> ImgProxy
+  ImgProxy --> S3
+  Public -- "RUM beacons" --> C
+  M <-- "cache lookups" --> Cache
+```
+
+### Subscribe → Confirm → Welcome (Mermaid source)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant V as Visitor (LP)
+  participant Web as Next Public Page
+  participant API as Rails API
+  participant DB as Postgres
+  participant Q as Sidekiq
+  participant ESP as ESP (SES/Sendgrid)
+  participant Hook as ESP Webhook Receiver
+
+  %% Subscribe
+  V->>Web: Submit email form
+  Web->>API: POST /v1/public/subscribe { email, list_id, utm, ua, ip }
+  API->>DB: UPSERT contact (email, list_id)
+  API->>DB: INSERT event{kind: signup, stage: initiated, consent:{ts, ip, ua}}
+  API->>DB: INSERT/UPSERT confirmation_token (contact_id, exp, used_at=null)
+
+  alt Existing contact & unconfirmed
+    API->>Q: Enqueue ConfirmationEmail(contact_id)
+    API-->>Web: 202 { status: "pending_confirmation" }
+  else Already confirmed
+    API-->>Web: 200 { status: "already_confirmed" }
+  else New contact
+    API->>Q: Enqueue ConfirmationEmail(contact_id)
+    API-->>Web: 202 { status: "pending_confirmation" }
+  end
+
+  Q->>ESP: Send confirmation email
+  Note over V,ESP: User checks inbox and clicks link
+
+  %% Confirm
+  V->>API: GET /v1/public/confirm?t=TOKEN
+  API->>DB: SELECT token (valid? unused? not expired?)
+  alt Token valid & unused & not expired
+    API->>DB: UPDATE confirmation_tokens.used_at = now()
+    API->>DB: UPDATE contacts.confirmed_at = now()
+    API->>DB: INSERT event{kind: confirm}
+    API->>Q: Enqueue WelcomeEmail(contact_id)
+    Q->>ESP: Send welcome email
+    API-->>V: 302 /p/:slug/thanks
+  else Token invalid/expired/used
+    API->>DB: INSERT event{kind: confirm_failed, reason}
+    API-->>V: 410 Gone (or 400) + CTA “Resend”
+  end
+
+  %% ESP webhooks → suppression & analytics
+  ESP-->>Hook: delivery/open/click/bounce/complaint
+  Hook->>API: POST /v1/hooks/esp {event, msg_id, email}
+  API->>DB: UPSERT event + suppression (on bounce/complaint)
+
+  %% Edge: resubmit existing email
+  rect rgba(200,200,255,0.15)
+    V-->>API: Resubmit same email
+    API->>DB: SELECT contact
+    alt Unconfirmed
+      API->>Q: Enqueue ConfirmationEmail(contact_id)
+      API-->>V: 200 { status: "pending_confirmation" }
+    else Confirmed
+      API-->>V: 200 { status: "already_confirmed" }
+    end
+  end
+
+  %% Abuse / rate-limit
+  rect rgba(255,245,200,0.25)
+    API->>API: Check rate limit (per IP/email)
+    alt Limit exceeded
+      API-->>V: 429 Too Many Requests
+    end
+  end
+
+  %% Worker retry / DLQ
+  rect rgba(255,200,200,0.15)
+    Q-->>API: (Retry) Job failure
+    API->>Q: Re-enqueue with exponential backoff (max_retries=N)
+    alt Exceeded max retries
+      API->>DB: INSERT event{kind: job_dead_letter}
+      API-->>API: Alert on-call / dashboard
+    end
+  end
+```
+
+---
+
+## API Surface
+
+| Domain      | Endpoint (prefix `/v1`)                | Purpose               | Notes                            |
+| ----------- | -------------------------------------- | --------------------- | -------------------------------- |
+| Auth        | `/auth/sign_in`                        | Session stub          | Enhance JWT later                |
+| Pages       | `/pages`, `/blocks`                    | Landing pages CRUD    | Slug fetch via `/pages/slug`     |
+| Broadcasts  | `/broadcasts`                          | Create & send emails  | Worker pipeline (stub)           |
+| Sequences   | `/sequences`                           | Drip campaigns        | Scheduling TBD                   |
+| Experiments | `/experiments`, `/experiments/results` | A/B config + results  | SRM & significance               |
+| Metrics     | `/metrics/*`                           | Analytics series      | Cohorts, engagement              |
+| RUM         | `/rum/*`                               | Perf & events summary | Client sampling                  |
+| Audience    | `/segments`, `/imports`, `/exports`    | Segments + CSV jobs   | Jobs + polling                   |
+| Webhooks    | `/webhooks/ingest`                     | ESP events intake     | DLQ & replay endpoints (concept) |
+| Billing     | `/stripe/checkout`, `/stripe/webhook`  | Plan upgrade          | Stubbed                          |
+| Public      | `/public/subscribe`, `/public/confirm` | Opt-in flow           | Tokens + redirect                |
+| Admin       | `/feature_flags`, `/feature_overrides` | Flags & overrides     | Plan + % rollout                 |
+
+Example response (cohorts):
 
 ```json
 [{ "url": "https://example.com", "unique_clickers": 123, "ctr": 0.084 }]
@@ -172,41 +355,40 @@ Response example (cohorts):
 
 ---
 
-## Data model (planned + partial)
+## Data Model
 
-| Table                   | Key Columns / JSON Fields                                                            | Purpose / Notes                                    | Index / Constraint Highlights                 |
-| ----------------------- | ------------------------------------------------------------------------------------ | -------------------------------------------------- | --------------------------------------------- |
-| orgs                    | id, name, plan                                                                       | Tenant / plan gating                               | plan; id PK                                   |
-| contacts                | id, org_id, email, confirmed_at                                                      | Subscriber identity & opt-in state                 | (org_id,email) unique; org_id                 |
-| confirmation_tokens     | contact_id, token, slug, variant, expires_at, used_at                                | Double opt‑in + attribution for LP / variant       | token unique; contact_id                      |
-| pages                   | id, org_id, slug, theme_json                                                         | Landing pages + theme config                       | (org_id,slug) unique                          |
-| blocks                  | id, page_id, kind, order, data_json                                                  | Ordered LP content blocks                          | (page_id,order); page_id                      |
-| broadcasts              | id, org_id, subject, html                                                            | One‑off email sends                                | org_id                                        |
-| deliveries              | id, org_id, contact_id, broadcast_id, status, opened_at, clicked_at, metadata        | Per-recipient delivery + engagement events         | (broadcast_id); (contact_id); partial(status) |
-| sequences (planned)     | id, org_id, name, schedule_json (future), active                                     | Drip campaign container (draft now in client only) | (org_id,name) partial unique                  |
-| sequence_steps(planned) | id, sequence_id, kind, position, config_json                                         | Normalized form of blocks for server execution     | (sequence_id,position)                        |
-| events                  | id, payload(jsonb), created_at                                                       | RUM + analytics + experiment / CTA signals         | GIN(payload); created_at DESC                 |
-| feature_flags           | key, enabled, rollout_pct                                                            | Global flag defaults                               | key unique                                    |
-| feature_overrides       | org_id, key, enabled                                                                 | Org‑scoped flag overrides                          | (org_id,key) unique                           |
-| experiments             | key, slug, variants_json{variants,alloc}, enabled, guardrail_note, last_evaluated_at | Experiment configuration & metadata                | key unique                                    |
-| imports (planned)       | id, org_id, kind, status, stats_json                                                 | CSV import job tracking                            | org_id; status                                |
-| exports (planned)       | id, org_id, kind, status, filter_json                                                | Export job tracking                                | org_id; status                                |
+| Table                     | Key Columns / JSON Fields                                                          | Purpose / Notes                            | Index Highlights                |
+| ------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------- |
+| orgs                      | id, name, plan                                                                     | Tenant / plan gating                       | plan; id PK                     |
+| contacts                  | id, org\_id, email, confirmed\_at                                                  | Subscriber identity & opt-in state         | (org\_id,email) unique; org\_id |
+| confirmation\_tokens      | contact\_id, token, slug, variant, expires\_at, used\_at                           | Double opt-in + attribution                | token unique; contact\_id       |
+| pages                     | id, org\_id, slug, theme\_json                                                     | Landing pages + theme config               | (org\_id,slug) unique           |
+| blocks                    | id, page\_id, kind, "order", data\_json                                            | Ordered LP content blocks                  | (page\_id,"order"); page\_id    |
+| broadcasts                | id, org\_id, subject, html                                                         | One-off email sends                        | org\_id                         |
+| deliveries                | id, org\_id, contact\_id, broadcast\_id, status, opened\_at, clicked\_at, metadata | Per-recipient delivery + engagement events | (broadcast\_id); (contact\_id)  |
+| sequences (planned)       | id, org\_id, name, schedule\_json (future), active                                 | Drip container (client draft)              | (org\_id,name) partial unique   |
+| sequence\_steps (planned) | id, sequence\_id, kind, position, config\_json                                     | Normalized steps for server execution      | (sequence\_id,position)         |
+| events                    | id, payload(jsonb), created\_at                                                    | RUM + analytics + experiment/CTA signals   | GIN(payload); created\_at DESC  |
+| feature\_flags            | key, enabled, rollout\_pct                                                         | Global flag defaults                       | key unique                      |
+| feature\_overrides        | org\_id, key, enabled                                                              | Org-scoped overrides                       | (org\_id,key) unique            |
+| imports (planned)         | id, org\_id, kind, status, stats\_json                                             | CSV import jobs                            | org\_id; status                 |
+| exports (planned)         | id, org\_id, kind, status, filter\_json                                            | Export jobs                                | org\_id; status                 |
 
-Indexes emphasize org scoping, uniqueness of emails per org, and JSONB GIN for flexible event querying. Planned tables denote future server persistence for currently in‑memory concepts.
+---
 
-## Health & Diagnostics (partial / planned)
+## Health & Diagnostics
 
-| Aspect       | Mechanism / Endpoint                          | Notes                                    |
-| ------------ | --------------------------------------------- | ---------------------------------------- |
-| API health   | `/health` (Rails) returns `{ ok, db, redis }` | Consumed by web proxy `/api/health`      |
-| Proxy timing | `x-proxy-duration-ms` header                  | Measures Next → Rails round‑trip latency |
-| UI error log | POST `/api/app/events` kind: `ui_error`       | Fire-and-forget capture before full APM  |
-| Queue stats  | (future) `/ops/queues`                        | Sidekiq latency / depth / retry          |
-| Webhook DLQ  | `/ops/webhooks` replay controls               | Manual replay window                     |
-| RUM metrics  | `/ops/rum`                                    | LCP/TTFB/device breakdown                |
-| Experiments  | `/ops/experiments`                            | SRM & significance overview              |
+| Aspect       | Mechanism / Endpoint                              | Notes                               |
+| ------------ | ------------------------------------------------- | ----------------------------------- |
+| API health   | `GET /health` (Rails) returns `{ ok, db, redis }` | Consumed by web proxy `/api/health` |
+| Proxy timing | `x-proxy-duration-ms` header                      | Next → Rails round-trip latency     |
+| UI error log | `POST /api/app/events` kind:`ui_error`            | Fire-and-forget capture             |
+| Queue stats  | (future) `GET /ops/queues`                        | Sidekiq latency / depth / retry     |
+| Webhook DLQ  | `GET/POST /ops/webhooks`                          | Replay/retry controls               |
+| RUM metrics  | `GET /ops/rum`                                    | LCP/TTFB/device breakdown           |
+| Experiments  | `GET /ops/experiments`                            | SRM & significance overview         |
 
-Inline event schema example (UI error):
+UI error event example:
 
 ```json
 {
@@ -218,195 +400,168 @@ Inline event schema example (UI error):
 }
 ```
 
+---
 
+## AI Integration Hooks
 
-````
-
-## Current features (partial / unstable)
-
-- Onboarding drawer; Dashboard CTAs & combined metrics endpoint
-- Email / Sequence designer (TipTap v3) with:
-  - Formatting: bold/italic/underline/strike, headings (H1–H3), lists, blockquote, code block (baseline), horizontal rule, links
-  - Slash command palette (`/`) for quick insert (headings, lists, code, HR, image placeholder)
-  - Plain vs Rich toggle (captures raw text for analytics & SMS segment estimation)
-  - Word / character counts; SMS 160‑char segment estimation for `sms` blocks
-  - (Images & syntax highlighting temporarily disabled pending extension version alignment)
-- Sequence builder: drag‑reorder blocks (email, wait, sms, branch), inline editors, remove actions, persistent draft store (client only)
-- LP builder: blocks (Hero / CTA / Subscribe / ThankYou / Features), **smart‑crop** & focal, SSR `<picture>`
-- Subscribe → **double opt‑in** → **welcome** worker (rate‑limited)
-- **Experiments**: variant selection, ramp control (simplified), SRM & χ² significance (basic), trends (rudimentary)
-- **RUM**: p50/p95 LCP/TTFB, device breakdown, CTA/signup events
-- Analytics: link cohorts, domain engagement, CSV exports
-- Webhooks: basic ingest + retry semantics (DLQ / replay concepts, not hardened)
-- Admin: feature flags, per‑org overrides, plan gates
-- Image proxy: Next + sharp; signed URLs helper
-
-### Sequence editor specifics
-Data shape (`SequenceDraft`):
-```ts
-interface SequenceDraft { id: string; name: string; updatedAt: number; blocks: SequenceBlock[] }
-type SequenceBlock = EmailBlock | SmsBlock | WaitBlock | BranchBlock;
-````
-
-Email & SMS blocks store both HTML and derived plain text (`bodyPlain`, `messagePlain`) enabling: analytics normalization, SMS length computation, future spam / deliverability heuristics.
-
-Current gaps (see "Known gaps" below): scheduling & execution of sequences, conditional DSL evaluation for branches, analytics attribution across a drip chain.
+* **Authoring:** subject scoring, tone rewrite, CTA variants, layout auto-fill.
+* **Template gallery:** semantic search + “build from prompt”.
+* **Segment copilot:** “contacts who clicked pricing and didn’t purchase”.
+* **Analytics insights:** “why did CTR drop last week?” (anomaly + narrative).
+* **Ops:** auto-triage webhook failures with suggested replay windows.
+* **Guardrails:** Bayesian bandits for allocation; auto-tune ramp % within constraints.
 
 ---
 
-## Known gaps / limitations (non‑exhaustive)
+## Getting Started
 
-| Area                     | Current State             | Limitation                                                |
-| ------------------------ | ------------------------- | --------------------------------------------------------- |
-| Sequence scheduling      | Draft only                | No send/queue logic yet (no cron/backoff)                 |
-| Sequence branching       | Simple text placeholder   | No parser / evaluation engine                             |
-| Editor images            | Disabled                  | TipTap image ext version mismatch (v3 core vs v2 ext)     |
-| Code highlighting        | Basic `<pre><code>` only  | Lowlight integration deferred (version conflict)          |
-| Deliverability analytics | Basic domain/link cohorts | No seed list / inbox placement / bounce classification    |
-| Feature flags            | In‑app toggle + overrides | No audit trail / targeting rules per segment              |
-| Webhook security         | Basic structure           | Missing full signature verification & replay auth scoping |
-| Billing                  | Fake Stripe flag          | No real subscription lifecycle / invoices                 |
-| RUM                      | Core metrics (LCP/TTFB)   | No long tasks / INP / resource waterfall                  |
-| Experiments              | SRM + χ²                  | No sequential testing / Bayesian bandits yet              |
-| Access control           | Plan gates                | Lacks granular role/permission model                      |
+### Prereqs
 
-## Future considerations (if this were extended)
+* Ruby **3.4.x**
+* Node **22.x** (Corepack enabled)
+* Postgres **15+**
+* Redis **7+**
+* `vips` (for sharp, if needed)
 
-- **Editor**: restore image + syntax highlight once TipTap ecosystem publishes full v3 set; add AI assisted rewrite/subject scoring endpoints.
-- **Sequence Engine**: scheduling (delays, retry, calendar rules), branch condition evaluator (safe expression sandbox), per‑step reporting & conversion funnel.
-- **Segmentation**: rule builder with preview counts, nested AND/OR, event property filters.
-- **Deliverability**: seed list monitoring, bounce/complaint classification taxonomy, reputation scoring, inbox placement simulation.
-- **Webhook Security**: provider signature verification (SES SNS / Sendgrid), rotating secrets, per‑org signing keys, replay nonce window.
-- **Billing**: real Stripe checkout/session webhooks, proration, usage tracking for sends.
-- **Warehouse / Analytics**: click/open events streaming to ClickHouse/BigQuery; incremental dbt models; derived retention & cohort dashboards.
-- **Performance**: add INP, CLS, long task tracking; worker queue saturation alerts.
-- **Privacy & Compliance**: DSAR automation (export/delete), consent versioning, encryption at rest for PII columns.
-- **Access Control**: org roles (Owner/Admin/Editor/Viewer) and feature entitlements matrix.
-- **Internationalization**: i18n message catalog, timezone‑aware scheduling, locale‑aware formatting.
-- **Testing**: contract tests for sequence API (when added), synthetic RUM baseline in CI.
+### Environment Variables
 
----
+Create `.env` (or export in your shell). Typical keys:
 
-## AI integration
+| Key                   | Example / Default                            | Where used       | Notes                              |
+| --------------------- | -------------------------------------------- | ---------------- | ---------------------------------- |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:4000`                      | Next.js (client) | Proxy target for web → API         |
+| `DATABASE_URL`        | `postgres://user:pass@localhost:5432/dev_db` | Rails API        | Or use local `config/database.yml` |
+| `REDIS_URL`           | `redis://localhost:6379/0`                   | Sidekiq + cache  |                                    |
+| `FAKE_STRIPE`         | `true`                                       | API billing stub | Returns fake checkout URL          |
+| `S3_EMULATOR`         | `true`                                       | Media            | If using MinIO in Docker           |
+| `RAILS_ENV`           | `development`                                | Rails            |                                    |
+| `NODE_ENV`            | `development`                                | Next.js          |                                    |
 
-- **Authoring**: subject line scoring, tone rewrite, CTA variants, layout auto‑fill (Hero/Feature items).
-- **Template gallery**: semantic search + “build from prompt” to scaffold LP/Email/Sequence.
-- **Segment builder Copilot**: “contacts who clicked pricing and didn’t purchase”.
-- **Analytics insights**: “why did CTR drop last week?” — anomaly detection + narrative.
-- **Ops**: auto‑triage of webhooks failures; suggested replay windows.
-- **Guardrails**: Bayesian bandits for allocation; auto‑tune ramp % within constraints.
+**.env example**
 
----
-
-## Run & develop
-
-### Local (no Docker) — Fast iteration
-
-Prereqs: Ruby 3.4.x, Node 22.x (Corepack), Postgres 15+, Redis 7+, `vips` (for sharp if needed).
-
-Setup:
-
-![Subscribe Flow (detailed)](docs/diagrams/subscribe_flow_detailed.png)
-
-<sub>Detailed subscribe → confirm flow exported manually; source sequence kept as `.mmd` if edits needed.</sub>
-
+```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
+FAKE_STRIPE=true
+S3_EMULATOR=true
+REDIS_URL=redis://localhost:6379/0
+```
 
-````
+### Local Dev (no Docker)
 
 Start services (separate tabs):
 
 ```bash
 pnpm dev:api        # Rails on :4000
 pnpm dev:web        # Next.js on :3000
-# Optional background jobs
-pnpm dev:sidekiq    # Sidekiq (queues: default, mailers)
-````
-
-Or combined:
-
-```bash
-pnpm dev:all        # API + Web
-pnpm dev:full       # API + Sidekiq + Web
-pnpm smoke:api      # Hit representative API endpoints (see scripts/smoke_endpoints.sh)
+pnpm dev:sidekiq    # optional: Sidekiq (queues: default, mailers)
 ```
 
-Visit: http://localhost:3000 → redirects to /dashboard (which calls API on :4000).
+Visit `http://localhost:3000` → redirects to `/dashboard`.
 
-Common fixes:
-| Symptom | Fix |
-|---------|-----|
-| 500 ECONNREFUSED | Ensure Rails on :4000 & NEXT_PUBLIC_API_URL correct |
-| Missing images | Use local storage (ActiveStorage :local) |
-| Jobs not processing | Start Sidekiq (pnpm dev:sidekiq) |
-| Editor SSR warning | RichEditor is client/dynamic (already fixed) |
+**Common fixes**
 
-### Docker (parity & CI)
+| Symptom             | Fix                                               |
+| ------------------- | ------------------------------------------------- |
+| 500 ECONNREFUSED    | Ensure Rails on :4000 & `NEXT_PUBLIC_API_URL` set |
+| Missing images      | Use local ActiveStorage                           |
+| Jobs not processing | Start Sidekiq (`pnpm dev:sidekiq`)                |
+| Editor SSR warning  | RichEditor is client/dynamic (already set)        |
+
+### Docker Dev
 
 ```bash
-# one‑time
 cp .env.example .env
 docker compose up --build
 
-# database
+# DB
 docker compose exec api bin/rails db:create db:migrate db:seed
 docker compose exec api bin/rails rake seed:demo_data
-docker compose exec api bin/rails rake seed:ai_demo  # optional demo content
+docker compose exec api bin/rails rake seed:ai_demo  # optional
 
-# create MinIO bucket (first time)
+# MinIO bucket (first time)
 mc alias set local http://localhost:9000 minio minio12345 || true
 mc mb local/dev-bucket || true
 ```
 
 Key routes:
 
-- Web app: `/` · LP editor `/page/[id]/edit` · Audience `/audience`
-- Public LP: `/p/[slug]` and `/p/[slug]/thanks`
-- Broadcast analytics: `/analytics/broadcast/[id]`
-- Ops: `/ops/queues`, `/ops/webhooks`, `/ops/rum`, `/ops/experiments`
-- Admin: `/admin/flags`, `/admin/plan`, `/admin/experiments`
-- Dev helpers (development only): `/v1/dev/latest_confirmation` (fetch most recent confirmation token for tests)
+* Web: `/` · LP Editor `/page/[id]/edit` · Audience `/audience`
+* Public LP: `/p/[slug]`, `/p/[slug]/thanks`
+* Broadcast analytics: `/analytics/broadcast/[id]`
+* Ops: `/ops/queues`, `/ops/webhooks`, `/ops/rum`, `/ops/experiments`
+* Admin: `/admin/flags`, `/admin/plan`, `/admin/experiments`
+* Dev helper (development only): `/v1/dev/latest_confirmation` (fetch latest confirmation token for tests)
 
-### Offline stack additions
+**Offline stack additions**
 
-- MinIO (`minio` service) emulates S3 (bucket: `dev-bucket`). Set `S3_EMULATOR=true` (default in `.env.example`) to bypass AWS signing and return direct PUT URLs.
-- Mailhog captures outbound SMTP on `:1025`, UI at `http://localhost:8025`.
-- Sidekiq worker now processes `default` + `mailers` queues.
-- Dev test helper exposes confirmation token for Playwright to complete double opt‑in flow without reading DB directly.
+* MinIO at `:9000` (bucket: `dev-bucket`, `S3_EMULATOR=true`)
+* Mailhog SMTP on `:1025`, UI at `http://localhost:8025`
+* Sidekiq processes `default` + `mailers`
 
 ### E2E (Playwright)
-
-Run:
 
 ```bash
 cd apps/web
 pnpm exec playwright test
 ```
 
-`subscribe-confirm.spec.ts` covers landing page subscribe → token retrieval → confirm redirect.
+Covers landing page subscribe → token retrieval → confirm redirect.
 
-### Makefile shortcuts & billing stub
-
-Targets:
+### Makefile Shortcuts
 
 ```bash
-make setup      # copy .env.example
-make up         # docker compose up --build
-make seed       # run db:seed inside container
-make reset-db   # drop, recreate, migrate, seed
-make e2e        # run Playwright test suite
+make setup     # copy .env.example
+make up        # docker compose up --build
+make seed      # db:seed inside container
+make reset-db  # drop, recreate, migrate, seed
+make e2e       # run Playwright suite
 make stripe-fake # trigger fake webhook update
 ```
 
-Billing: with `FAKE_STRIPE=true` the API returns a stub checkout URL and immediately marks a local subscription active (plan from `price_id`). Disable by removing or setting flag to false to integrate real Stripe credentials.
+---
+
+## Known Gaps
+
+| Area                     | Current State         | Limitation                                     |
+| ------------------------ | --------------------- | ---------------------------------------------- |
+| Sequence scheduling      | Draft only            | No send/queue logic (no cron/backoff)          |
+| Sequence branching       | Text placeholder      | No parser/evaluation engine                    |
+| Editor images            | Disabled              | TipTap v3/v2 ext mismatch                      |
+| Code highlighting        | Basic `<pre><code>`   | Lowlight deferred                              |
+| Deliverability analytics | Domain/link cohorts   | No bounce taxonomy / seed list                 |
+| Feature flags            | UI toggle + overrides | No audit trail or complex targeting            |
+| Webhook security         | Basic ingest          | Missing signature verify & replay auth scoping |
+| Billing                  | Fake Stripe flag      | No real subscription lifecycle/invoices        |
+| RUM                      | LCP/TTFB only         | No INP/CLS/long tasks                          |
+| Experiments              | SRM + χ²              | No sequential/Bayesian approaches              |
+| Access control           | Plan gates            | No roles/permissions                           |
 
 ---
 
-## Diagrams
+## Future Considerations
 
-PNGs are committed directly. Source `.mmd` files in `docs/diagrams/` remain only as editable Mermaid definitions. There are **no local scripts or CI tasks** to regenerate them. Use an external tool (e.g. Mermaid Live Editor or a desktop renderer) to export a new PNG and overwrite the existing file (keep the same filename) if you change a diagram.
+* **Editor**: restore image + syntax highlight once TipTap v3 ecosystem matures; add AI rewrite/subject scoring endpoints.
+* **Sequence engine**: scheduling (delays, retry, calendar rules), branch evaluator (safe sandbox), per-step reporting.
+* **Segmentation**: rule builder with preview counts, nested AND/OR, event property filters.
+* **Deliverability**: seed lists, bounce/complaint taxonomy, reputation scoring, inbox placement simulations.
+* **Webhook Security**: provider signature verification, rotating secrets, per-org signing keys, replay nonces.
+* **Billing**: real Stripe checkout/webhooks, proration, usage tracking.
+* **Warehouse/Analytics**: stream events to ClickHouse/BigQuery; dbt models; retention/cohort dashboards.
+* **Performance**: add INP/CLS/long task tracking; queue saturation alerts.
+* **Privacy/Compliance**: DSAR export/delete, consent versioning, PII encryption at rest.
+* **Access Control**: org roles (Owner/Admin/Editor/Viewer) + entitlements matrix.
+* **Testing**: contract tests for sequence API; synthetic RUM baseline in CI.
+
+---
+
+## Glossary
+
+* **LP** — Landing Page (public page at `/p/:slug`).
+* **SRM** — Sample Ratio Mismatch (allocation skew detector).
+* **RUM** — Real User Monitoring (LCP/TTFB/INP signals).
+* **DLQ** — Dead Letter Queue (failed jobs after max retries).
+* **ESP** — Email Service Provider (SES/Sendgrid here).
+
+---
 
 
-### LP publish flow (high-level)
-
-![LP Publish Flow](docs/diagrams/lp_publish_flow.png)
