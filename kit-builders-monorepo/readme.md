@@ -2,14 +2,9 @@
 
 Minimal, demo-focused prototype for a creator publishing experience. Not production-ready; intended only for exploration & discussion.
 
-## Demo (Video)
-
-Clickable thumbnail below links to the hosted demo video asset.
+## Demo 
 
 [![Demo Video](docs/screenshots/dashboard.png)](https://github.com/user-attachments/assets/abcf960f-d75d-41fd-808d-3ed449528c09)
-
-Direct link (GitHub will open an inline player):
-https://github.com/user-attachments/assets/abcf960f-d75d-41fd-808d-3ed449528c09
 
 ## Quick Start
 
