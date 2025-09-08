@@ -13,14 +13,9 @@ local-only exploration of a creator + optimizer loop: draft → publish → obse
 
 ## Demo
 
-<video src="./docs/demo.mp4" width="720" autoplay loop muted playsinline controls poster="./docs/demo-poster.png">
-	<source src="./docs/demo.mp4" type="video/mp4" />
-	Your browser does not support the video tag. <a href="./docs/demo.mp4">Download the demo video</a>.
-</video>
-
-Flow: template → edit → publish/variant → email variant + rewrite → simulation/events.
-
-If the video does not load, here please find the video at `docs/demo.mp4` location.
+[![Demo video](./docs/demo-poster.png)](https://github.com/user-attachments/assets/454375fc-ef22-4d71-8727-8400b961466d)
+60s flow: template → edit → publish variant → email variant + rewrite → simulation/events.
+If the asset URL ever breaks, re-upload via an issue and replace the link.
 
 ## Tech Stack
 
