@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+.pnp.cjs
+.pnp.loader.mjs
+
+# Build output
+.next/
+out/
+dist/
+build/
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+
+# Env / secrets
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env
+
+# Temporary
+*.tmp
+*.temp
+.tmp/
+.cache/
+.parcel-cache/
+
+# Next.js
+.vercel/
+
+# Coverage
+lcov.info
+
+# Generated assets
+public/generated/
+
+# Misc
+*.log
+*.tgz

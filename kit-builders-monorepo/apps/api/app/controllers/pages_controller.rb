@@ -28,6 +28,7 @@ class PagesController < ApplicationController
       attrs[:org_id] ||= 1
       page = Page.new(attrs)
       if page.save
+  EventLogger.emit('page_created', page_id: page.id, org_id: page.org_id, user_id: current_user&.id)
         render json: page, status: :created
       else
         Rails.logger.warn("[pages#create] validation errors=#{page.errors.full_messages.inspect} params=#{attrs.inspect}")
@@ -60,6 +61,7 @@ class PagesController < ApplicationController
     begin
       page = Page.find(params[:id])
       page.update!(status: 'published', published_at: Time.now)
+  EventLogger.emit('page_published', page_id: page.id, org_id: page.org_id, user_id: current_user&.id, published_at: page.published_at)
       render json: { ok: true, slug: page.slug }
     rescue ActiveRecord::RecordNotFound
       render json: { errors: ["Not found"] }, status: :not_found
