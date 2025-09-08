@@ -13,9 +13,9 @@ local-only exploration of a creator + optimizer loop: draft → publish → obse
 
 ## Demo
 
-[![Demo video](./docs/demo-poster.png)](https://github.com/user-attachments/assets/454375fc-ef22-4d71-8727-8400b961466d)
-60s flow: template → edit → publish variant → email variant + rewrite → simulation/events.
-If the asset URL ever breaks, re-upload via an issue and replace the link.
+[![Demo video](docs/demo-poster.png)](https://github.com/user-attachments/assets/454375fc-ef22-4d71-8727-8400b961466d)
+
+
 
 ## Tech Stack
 
